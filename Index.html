@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+  <style type="text/css" media="all">
+  
+    *, html, body {
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+    }
+    body {
+      transition: all .6s ease-in-out;
+    }
+    .container {
+      width: 100vw;
+      height: 100vh;
+      border: 1px solid black;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    .box {
+      justify-content: center;
+      align-items: center;
+      border: 1px solid black;
+      width: 60%;
+      height: 12%;
+      border-radius: 15px;
+      display: flex;
+      justify-content: space-evenly;
+      background-color: #4b4a4a32;
+    }
+    .color {
+      height: 48%;
+      width: 17%;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    .red {
+      background-color: #ed3e3e;
+    }
+    .blue {
+      background-color: #3c99e7;
+    }
+    .green {
+     background-color: #74eb78cf;
+    }
+    .black {
+      background-color: #0f0f0f;
+    }
+  </style>
+  <head>
+    <title>Color</title>
+  </head>
+  <body>
+    <div class="container">
+      <div class="box">
+        <div class="color red"></div>
+        <div class="color blue"></div>
+        <div class="color green"></div>
+        <div class="color black"></div>
+      </div>
+    </div>
+    <script type="text/javascript" charset="utf-8">
+      const colors = document.querySelectorAll('.color')
+
+      colors.forEach((color) => {
+        color.addEventListener("click", ({target}) => {
+          const computedStyle = getComputedStyle(target)
+          document.body.style.backgroundColor = computedStyle.backgroundColor
+          
+      })})
+    </script>
+  </body>
+</html>
