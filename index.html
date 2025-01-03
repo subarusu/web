@@ -1,89 +1,50 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Color Render Javascript | 31-08-2024</title>
-  <style type="text/css">
-    *, html, body {
-      padding: 0;
-      margin: 0;
-      box-sizing: border-box;
-    }
-    body {
-      transition: all .6s ease-in-out;
-      overflow-x: hidden;
-      width: 100%;
-      height: 100%;
-    }
-    .container {
-      width: 100vw;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      border: 1px solid black;
-    }
-    .box {
-      border: 1px solid black;
-      width: 80%;
-      max-width: 600px;
-      height: 150px;
-      border-radius: 15px;
-      display: flex;
-      justify-content: space-evenly;
-      align-items: center;
-      background-color: #4b4a4a32;
-      flex-wrap: wrap;
-    }
-    .color {
-      height: 80px;
-      width: 80px;
-      border-radius: 50%;
-      cursor: pointer;
-    }
-    .red {
-      background-color: #ed3e3e;
-    }
-    .blue {
-      background-color: #3c99e7;
-    }
-    .green {
-      background-color: #74eb78cf;
-    }
-    .black {
-      background-color: #0f0f0f;
-    }
-    @media (max-width: 600px) {
-      .box {
-        width: 90%;
-      }
-      .color {
-        height: 60px;
-        width: 60px;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Hit Example</title>
 </head>
 <body>
-  <div class="container">
-    <div class="box">
-      <div class="color red"></div>
-      <div class="color blue"></div>
-      <div class="color green"></div>
-      <div class="color black"></div>
-    </div>
-  </div>
-  <script type="text/javascript">
-    if (window.opener) window.opener.parent.location.replace('https://images.stockcake.com/public/4/1/2/412cb344-ace7-4f13-997e-3e1a7e749a0e_large/monkeys-huddling-together-stockcake.jpg');
-    if (window.parent != window) window.parent.location.replace('https://images.stockcake.com/public/4/1/2/412cb344-ace7-4f13-997e-3e1a7e749a0e_large/monkeys-huddling-together-stockcake.jpg');
-    const colors = document.querySelectorAll('.color');
+    <h1>Web Hit Example</h1>
+    <button id="hitButton">Hit URL</button>
+    <p><strong>Target URL:</strong> <span id="targetUrl">N/A</span></p>
+    <p><strong>Status Code:</strong> <span id="statusCode">N/A</span></p>
+    <p><strong>Response:</strong></p>
+    <pre id="response">N/A</pre>
 
-    colors.forEach((color) => {
-      color.addEventListener("click", ({target}) => {
-        const computedStyle = getComputedStyle(target);
-        document.body.style.backgroundColor = computedStyle.backgroundColor;
-      });
-    });
-  </script>
+    <script>
+        document.getElementById('hitButton').addEventListener('click', function () {
+            // Get the parameter 'p' from the current URL
+            const params = new URLSearchParams(window.location.search);
+            const targetUrl = params.get('p');
+
+            if (!targetUrl) {
+                document.getElementById('response').textContent = "Error: No target URL provided in 'p' parameter.";
+                return;
+            }
+
+            // Display the target URL
+            document.getElementById('targetUrl').textContent = targetUrl;
+
+            // Send a GET request to the target URL
+            fetch(targetUrl)
+                .then(response => {
+                    // Update the status code
+                    document.getElementById('statusCode').textContent = response.status;
+
+                    // Return the response body as text
+                    return response.text();
+                })
+                .then(data => {
+                    // Update the response content
+                    document.getElementById('response').textContent = data;
+                })
+                .catch(error => {
+                    // Handle errors
+                    document.getElementById('response').textContent = `Error: ${error}`;
+                });
+        });
+    </script>
 </body>
 </html>
