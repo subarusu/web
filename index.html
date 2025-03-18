@@ -1,50 +1,218 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Hit Example</title>
+    <title>Input Barang</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="list.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: Poppins, Sans-Serif;
+            background-color: #E3F2FD;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        input:focus,
+        select:focus,
+        textarea:focus,
+        button:focus {
+          outline: none;
+          }
+        .container {
+            background: white;
+            padding: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            width: 360px;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #1565C0;
+            font-weight: bold;
+        }
+        label {
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            text-align: center;
+            padding: 8px;
+        }
+        th {
+            background-color: #64B5F6;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #E3F2FD;
+        }
+        button {
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+        }
+        .minus {
+            background-color: red;
+            color: white;
+            border-radius: 3px;
+        }
+        .plus {
+            background-color: green;
+            color: white;
+            border-radius: 3px;
+        }
+        .submit-btn {
+            width: 100%;
+            margin-top: 15px;
+            background-color: white;
+            color: black;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 18px;
+            border: 1px solid black;
+            border-inline-color: black;
+        }
+        .submit-btn:hover {
+            background-color: green;
+            color: white;
+            display: ease-in-out;
+            border: 0;
+        }
+        /* Popup Custom */
+        .popup {
+            position: fixed;
+            top: 20px;
+            right: -300px;
+            background: #43A047;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            transition: right 0.5s ease-in-out;
+        }
+        .popup.show {
+            right: 20px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Web Hit Example</h1>
-    <button id="hitButton">Hit URL</button>
-    <p><strong>Target URL:</strong> <span id="targetUrl">N/A</span></p>
-    <p><strong>Status Code:</strong> <span id="statusCode">N/A</span></p>
-    <p><strong>Response:</strong></p>
-    <pre id="response">N/A</pre>
 
-    <script>
-        document.getElementById('hitButton').addEventListener('click', function () {
-            // Get the parameter 'p' from the current URL
-            const params = new URLSearchParams(window.location.search);
-            const targetUrl = params.get('p');
+<div class="container">
+    <h2>OTF</h2>
+    
+    <label></label>
+    <input type="text" id="username" placeholder="Masukkan nama anda">
 
-            if (!targetUrl) {
-                document.getElementById('response').textContent = "Error: No target URL provided in 'p' parameter.";
-                return;
-            }
+    <table>
+        <thead>
+            <tr>
+                <th>NO</th>
+                <th>LIST</th>
+                <th>JUMLAH</th>
+            </tr>
+        </thead>
+        <tbody id="barang-list">
+            <!-- Data barang akan di-generate di sini -->
+        </tbody>
+    </table>
 
-            // Display the target URL
-            document.getElementById('targetUrl').textContent = targetUrl;
+    <button class="submit-btn" onclick="kirimData()">Selesai</button>
+</div>
 
-            // Send a GET request to the target URL
-            fetch(targetUrl)
-                .then(response => {
-                    // Update the status code
-                    document.getElementById('statusCode').textContent = response.status;
+<!-- Popup -->
+<div id="popup" class="popup"></div>
 
-                    // Return the response body as text
-                    return response.text();
-                })
-                .then(data => {
-                    // Update the response content
-                    document.getElementById('response').textContent = data;
-                })
-                .catch(error => {
-                    // Handle errors
-                    document.getElementById('response').textContent = `Error: ${error}`;
-                });
+<script>
+    let dataBarang = {};
+
+    // Fungsi untuk menampilkan popup
+    function showPopup(message, isError = false) {
+        const popup = document.getElementById("popup");
+        popup.textContent = message;
+        popup.style.background = isError ? "#D32F2F" : "#43A047";
+        popup.classList.add("show");
+        setTimeout(() => popup.classList.remove("show"), 3000);
+    }
+
+    // Fungsi untuk mengisi tabel barang dari file.js
+    function loadBarang() {
+        const tbody = document.getElementById("barang-list");
+        daftarBarang.forEach((item, index) => {
+            dataBarang[item.id] = 0;
+            tbody.innerHTML += `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td>${item.nama}</td>
+                    <td>
+                        <button class="minus" onclick="updateJumlah('${item.id}', -1)">-</button>
+                        <span id="${item.id}">0</span>
+                        <button class="plus" onclick="updateJumlah('${item.id}', +1)">+</button>
+                    </td>
+                </tr>
+            `;
         });
-    </script>
+    }
+
+    function updateJumlah(item, value) {
+        dataBarang[item] = Math.max(0, dataBarang[item] + value);
+        document.getElementById(item).textContent = dataBarang[item];
+    }
+
+    function kirimData() {
+        const username = document.getElementById("username").value.trim();
+        if (!username) {
+            showPopup("Nama pengguna harus diisi!", true);
+            return;
+        }
+
+        const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+        const now = new Date();
+        const hari = days[now.getDay()];
+        const tanggal = now.toLocaleDateString("id-ID").replace(/\//g, '-');
+        const fileName = `${hari}-${username}-${tanggal}.xlsx`;
+
+        // Buat file Excel
+        let wb = XLSX.utils.book_new();
+        let wsData = [["No", "List", "Jumlah"]];
+        let no = 1;
+        for (let item in dataBarang) {
+            wsData.push([no++, item.charAt(0).toUpperCase() + item.slice(1), dataBarang[item]]);
+        }
+        let ws = XLSX.utils.aoa_to_sheet(wsData);
+        XLSX.utils.book_append_sheet(wb, ws, "Data Barang");
+
+        let wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+        let blob = new Blob([wbout], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+
+        // Kirim ke Telegram menggunakan API di Backend (disembunyikan)
+        fetch("", {
+            method: "POST",
+            body: new FormData().append("file", blob, fileName)
+        }).then(() => showPopup("Data berhasil dikirim"))
+          .catch(() => showPopup("Gagal mengirim data!", true));
+    }
+
+    loadBarang();
+</script>
+
 </body>
 </html>
+
