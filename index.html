@@ -177,42 +177,53 @@
     }
 
     function kirimData() {
-        const username = document.getElementById("username").value.trim();
-        if (!username) {
-            showPopup("Nama pengguna harus diisi!", true);
-            return;
-        }
-
-        const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-        const now = new Date();
-        const hari = days[now.getDay()];
-        const tanggal = now.toLocaleDateString("id-ID").replace(/\//g, '-');
-        const fileName = `${hari}-${username}-${tanggal}.xlsx`;
-
-        // Buat file Excel
-        let wb = XLSX.utils.book_new();
-        let wsData = [["No", "List", "Jumlah"]];
-        let no = 1;
-        for (let item in dataBarang) {
-            wsData.push([no++, item.charAt(0).toUpperCase() + item.slice(1), dataBarang[item]]);
-        }
-        let ws = XLSX.utils.aoa_to_sheet(wsData);
-        XLSX.utils.book_append_sheet(wb, ws, "Data Barang");
-
-        let wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-        let blob = new Blob([wbout], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-
-        // Kirim ke Telegram menggunakan API di Backend (disembunyikan)
-        fetch("", {
-            method: "POST",
-            body: new FormData().append("file", blob, fileName)
-        }).then(() => showPopup("Data berhasil dikirim"))
-          .catch(() => showPopup("Gagal mengirim data!", true));
+    const username = document.getElementById("username").value.trim();
+    if (!username) {
+        showPopup("Nama pengguna harus diisi!", true);
+        return;
     }
+
+    const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+    const now = new Date();
+    const hari = days[now.getDay()];
+    const tanggal = now.toLocaleDateString("id-ID").replace(/\//g, '-');
+    const fileName = `${hari}-${username}-${tanggal}.xlsx`;
+
+    // Buat file Excel
+    let wb = XLSX.utils.book_new();
+    let wsData = [["No", "List", "Jumlah"]];
+    let no = 1;
+    for (let item in dataBarang) {
+        wsData.push([no++, item.charAt(0).toUpperCase() + item.slice(1), dataBarang[item]]);
+    }
+    let ws = XLSX.utils.aoa_to_sheet(wsData);
+    XLSX.utils.book_append_sheet(wb, ws, "Data Barang");
+
+    let wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    let blob = new Blob([wbout], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+
+    // Kirim file ke API Cloudflare Workers
+    let formData = new FormData();
+    formData.append("file", blob, fileName);
+
+    fetch("https://tele-api-hide.arifuddin0902.workers.dev", { // Ganti dengan URL API Cloudflare
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            showPopup("Data berhasil dikirim ke Telegram");
+        } else {
+            throw new Error(data.error || "Terjadi kesalahan");
+        }
+    })
+    .catch(() => showPopup("Gagal mengirim data!", true));
+}
+
 
     loadBarang();
 </script>
 
 </body>
 </html>
-
