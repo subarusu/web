@@ -3,116 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OTF</title>
+    <title>Input Barang</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="list.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: Poppins, Sans-Serif;
-            background-color: #E3F2FD;
+            background-color: white;
+            margin: 0;
+            padding: 20px;
             display: flex;
             justify-content: center;
             align-items: flex-start;
             min-height: 100vh;
-            margin: 0;
-            padding: 20px;
         }
-        input:focus, select:focus, textarea:focus, button:focus {
-            outline: none;
-        }
+
         .container {
             background: white;
             padding: 20px;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
-            width: 450px;
-            max-height: 90vh;
-            overflow-y: auto;
+            width: 100%;
+            max-width: 600px;
         }
+
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 16px;
+            display: none;
+            z-index: 1000;
+            min-width: 250px;
+        }
+
         h2 {
             text-align: center;
             margin-bottom: 15px;
             color: #1565C0;
             font-weight: bold;
         }
-        label {
-            font-weight: bold;
-        }
+
         input {
             width: 100%;
-            padding: 8px;
+            padding: 10px;
             margin: 5px 0 15px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            border: none;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-transform: uppercase;
         }
+
+        input:focus {
+            outline: none;
+            box-shadow: 0 3px 7px rgba(0, 0, 0, 0.2);
+        }
+
+        .table-container {
+            width: 100%;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            position: relative;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            display: block;
-            overflow-y: auto;
-            max-height: 400px;
+            table-layout: fixed;
         }
+
         th, td {
             border: 1px solid #ddd;
             text-align: center;
-            padding: 8px;
+            padding: 10px;
             word-wrap: break-word;
         }
-        th {
-            background-color: #64B5F6;
-            color: white;
+
+        thead {
             position: sticky;
             top: 0;
+            background-color: #64B5F6;
+            color: white;
+            z-index: 100;
         }
+
+        th {
+            padding: 12px;
+        }
+
         tr:nth-child(even) {
             background-color: #E3F2FD;
         }
-        button {
-            padding: 5px 10px;
+
+        .btn-group {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .minus, .plus {
+            padding: 5px;
             border: none;
             cursor: pointer;
+            border-radius: 50%;
+            color: white;
+            width: 30px;
+            height: 30px;
+            font-size: 16px;
         }
+
         .minus {
             background-color: red;
-            color: white;
-            border-radius: 3px;
         }
+
         .plus {
             background-color: green;
-            color: white;
-            border-radius: 3px;
         }
+
         .submit-btn {
-            width: 100%;
-            margin-top: 15px;
-            background-color: white;
-            color: black;
-            padding: 10px;
-            border-radius: 4px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
             cursor: pointer;
-            font-size: 18px;
-            border: 1px solid black;
+            width: 100%;
+            transition: background-color 0.3s, transform 0.2s;
+            text-transform: uppercase;
         }
-        .submit-btn:hover {
-            background-color: green;
-            color: white;
+
+        .submit-btn:active {
+            transform: scale(0.95);
         }
-        /* Popup Custom */
-        .popup {
-            position: fixed;
-            top: 20px;
-            right: -300px;
-            background: #43A047;
-            color: white;
-            padding: 15px;
-            border-radius: 5px;
-            transition: right 0.5s ease-in-out;
+
+        .submit-btn:disabled {
+            background-color: gray;
+            cursor: not-allowed;
         }
-        .popup.show {
-            right: 20px;
+
+        .sending {
+            background-color: #ff9800 !important;
+        }
+
+        .success {
+            background-color: #4CAF50 !important;
+        }
+
+        .failed {
+            background-color: red !important;
+        }
+
+        @media (max-width: 480px) {
+            th, td {
+                font-size: 14px;
+                padding: 6px;
+            }
+
+            .minus, .plus {
+                width: 25px;
+                height: 25px;
+                font-size: 14px;
+            }
         }
     </style>
 </head>
@@ -120,39 +181,29 @@
 
 <div class="container">
     <h2>OTF</h2>
-    
+
     <label>Nama</label>
-    <input type="text" id="username" placeholder="Masukkan nama anda">
+    <input type="text" id="username" placeholder="Masukkan nama anda" oninput="checkName()">
 
-    <table>
-        <thead>
-            <tr>
-                <th>NO</th>
-                <th>LIST</th>
-                <th>JUMLAH</th>
-            </tr>
-        </thead>
-        <tbody id="barang-list">
-            <!-- Data barang akan di-generate di sini -->
-        </tbody>
-    </table>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 10%;">NO</th>
+                    <th style="width: 50%;">LIST</th>
+                    <th style="width: 40%;">JUMLAH</th>
+                </tr>
+            </thead>
+            <tbody id="barang-list"></tbody>
+        </table>
+    </div>
 
-    <button class="submit-btn" onclick="kirimData()">Selesai</button>
+    <button class="submit-btn" id="submit-btn" onclick="kirimData()" disabled>Kirim</button>
 </div>
-
-<!-- Popup -->
-<div id="popup" class="popup"></div>
+<div id="popup" class="popup">Silakan isi nama terlebih dahulu!</div>
 
 <script>
     let dataBarang = {};
-
-    function showPopup(message, isError = false) {
-        const popup = document.getElementById("popup");
-        popup.textContent = message;
-        popup.style.background = isError ? "#D32F2F" : "#43A047";
-        popup.classList.add("show");
-        setTimeout(() => popup.classList.remove("show"), 3000);
-    }
 
     function loadBarang() {
         const tbody = document.getElementById("barang-list");
@@ -163,9 +214,11 @@
                     <td>${index + 1}</td>
                     <td>${item.nama}</td>
                     <td>
-                        <button class="minus" onclick="updateJumlah('${item.id}', -1)">-</button>
-                        <span id="${item.id}">0</span>
-                        <button class="plus" onclick="updateJumlah('${item.id}', +1)">+</button>
+                        <div class="btn-group">
+                            <button class="minus" onclick="updateJumlah('${item.id}', -1)">-</button>
+                            <span id="${item.id}">0</span>
+                            <button class="plus" onclick="updateJumlah('${item.id}', +1)">+</button>
+                        </div>
                     </td>
                 </tr>
             `;
@@ -177,48 +230,73 @@
         document.getElementById(item).textContent = dataBarang[item];
     }
 
-    function kirimData() {
-        const username = document.getElementById("username").value.trim();
+    function checkName() {
+        let username = document.getElementById("username").value.trim();
+        document.getElementById("submit-btn").disabled = username === "";
+    }
+
+    function generateExcel() {
+        let username = document.getElementById("username").value.trim().toUpperCase();
+        let tanggal = new Date();
+        let hariList = ["MINGGU", "SENIN", "SELASA", "RABU", "KAMIS", "JUMAT", "SABTU"];
+        let hariIni = hariList[tanggal.getDay()];
+        let hariPlus2 = hariList[(tanggal.getDay() + 2) % 7];
+
+        let namaFile = `${username}-${hariIni}-${hariPlus2}[${tanggal.getDate().toString().padStart(2, '0')}-${(tanggal.getMonth() + 1).toString().padStart(2, '0')}-${tanggal.getFullYear()}].xlsx`;
+
+        let dataArray = [["NO", "LIST BARANG", "JUMLAH"]];
+        Object.entries(dataBarang).forEach(([key, jumlah], index) => {
+            let barang = daftarBarang.find(item => item.id === key);
+            dataArray.push([index + 1, barang.nama, jumlah]);
+        });
+
+        let ws = XLSX.utils.aoa_to_sheet(dataArray);
+        let wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "DATA BARANG");
+
+        let excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+        return { blob: new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), namaFile };
+    }
+function showPopup(message) {
+    let popup = document.getElementById("popup");
+    popup.textContent = message;
+    popup.style.display = "block";
+
+    setTimeout(() => {
+        popup.style.display = "none";
+    }, 2000);
+}
+
+    async function kirimData() {
+        let username = document.getElementById("username").value.trim().toUpperCase();
         if (!username) {
-            showPopup("Nama pengguna harus diisi!", true);
+            showPopup("Silakan isi nama terlebih dahulu!");
             return;
         }
-
-        const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-        const now = new Date();
-        const hari = days[now.getDay()];
-        const tanggal = now.toLocaleDateString("id-ID").replace(/\//g, '-');
-        const fileName = `${hari}-${username}-${tanggal}.xlsx`;
-
-        let wb = XLSX.utils.book_new();
-        let wsData = [["No", "List", "Jumlah"]];
-        let no = 1;
-        for (let item in dataBarang) {
-            wsData.push([no++, item.charAt(0).toUpperCase() + item.slice(1), dataBarang[item]]);
-        }
-        let ws = XLSX.utils.aoa_to_sheet(wsData);
-        XLSX.utils.book_append_sheet(wb, ws, "Data Barang");
-
-        let wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-        let blob = new Blob([wbout], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-
+    
+        let btn = document.getElementById("submit-btn");
+        let { blob, namaFile } = generateExcel();
+    
         let formData = new FormData();
-        formData.append("file", blob, fileName);
-
-        fetch("https://black-art-13c9.arifuddin0902.workers.dev", {
-            method: "POST",
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.message) {
-                showPopup("Data berhasil dikirim ke Telegram");
-            } else {
-                throw new Error(data.error || "Terjadi kesalahan");
-            }
-        })
-        .catch(() => showPopup("Gagal mengirim data!", true));
+        formData.append("file", blob, namaFile);
+    
+        btn.textContent = "MENGIRIM...";
+        btn.classList.add("sending");
+        btn.disabled = true;
+    
+        try {
+            let response = await fetch("https://black-art-13c9.arifuddin0902.workers.dev/", { method: "POST", body: formData });
+            btn.textContent = response.ok ? "TERKIRIM ✓" : "GAGAL!";
+            btn.classList.toggle("success", response.ok);
+            btn.classList.toggle("failed", !response.ok);
+        } finally {
+            setTimeout(() => {
+                btn.textContent = "KIRIM";
+                btn.disabled = false;
+                btn.classList.remove("success", "failed", "sending");
+            }, 2000);
     }
+}
 
     loadBarang();
 </script>
