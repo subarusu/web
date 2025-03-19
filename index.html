@@ -3,34 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Input Barang</title>
+    <title>OTF</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="list.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: Poppins, Sans-Serif;
             background-color: #E3F2FD;
             display: flex;
             justify-content: center;
-            align-items: center;
-            height: 100vh;
+            align-items: flex-start;
+            min-height: 100vh;
             margin: 0;
+            padding: 20px;
         }
-        input:focus,
-        select:focus,
-        textarea:focus,
-        button:focus {
-          outline: none;
-          }
+        input:focus, select:focus, textarea:focus, button:focus {
+            outline: none;
+        }
         .container {
             background: white;
             padding: 20px;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
-            width: 360px;
+            width: 450px;
+            max-height: 90vh;
+            overflow-y: auto;
         }
         h2 {
             text-align: center;
@@ -51,15 +51,21 @@
         table {
             width: 100%;
             border-collapse: collapse;
+            display: block;
+            overflow-y: auto;
+            max-height: 400px;
         }
         th, td {
             border: 1px solid #ddd;
             text-align: center;
             padding: 8px;
+            word-wrap: break-word;
         }
         th {
             background-color: #64B5F6;
             color: white;
+            position: sticky;
+            top: 0;
         }
         tr:nth-child(even) {
             background-color: #E3F2FD;
@@ -89,13 +95,10 @@
             cursor: pointer;
             font-size: 18px;
             border: 1px solid black;
-            border-inline-color: black;
         }
         .submit-btn:hover {
             background-color: green;
             color: white;
-            display: ease-in-out;
-            border: 0;
         }
         /* Popup Custom */
         .popup {
@@ -118,7 +121,7 @@
 <div class="container">
     <h2>OTF</h2>
     
-    <label></label>
+    <label>Nama</label>
     <input type="text" id="username" placeholder="Masukkan nama anda">
 
     <table>
@@ -143,7 +146,6 @@
 <script>
     let dataBarang = {};
 
-    // Fungsi untuk menampilkan popup
     function showPopup(message, isError = false) {
         const popup = document.getElementById("popup");
         popup.textContent = message;
@@ -152,7 +154,6 @@
         setTimeout(() => popup.classList.remove("show"), 3000);
     }
 
-    // Fungsi untuk mengisi tabel barang dari file.js
     function loadBarang() {
         const tbody = document.getElementById("barang-list");
         daftarBarang.forEach((item, index) => {
@@ -177,50 +178,47 @@
     }
 
     function kirimData() {
-    const username = document.getElementById("username").value.trim();
-    if (!username) {
-        showPopup("Nama pengguna harus diisi!", true);
-        return;
-    }
-
-    const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-    const now = new Date();
-    const hari = days[now.getDay()];
-    const tanggal = now.toLocaleDateString("id-ID").replace(/\//g, '-');
-    const fileName = `${hari}-${username}-${tanggal}.xlsx`;
-
-    // Buat file Excel
-    let wb = XLSX.utils.book_new();
-    let wsData = [["No", "List", "Jumlah"]];
-    let no = 1;
-    for (let item in dataBarang) {
-        wsData.push([no++, item.charAt(0).toUpperCase() + item.slice(1), dataBarang[item]]);
-    }
-    let ws = XLSX.utils.aoa_to_sheet(wsData);
-    XLSX.utils.book_append_sheet(wb, ws, "Data Barang");
-
-    let wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    let blob = new Blob([wbout], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-
-    // Kirim file ke API Cloudflare Workers
-    let formData = new FormData();
-    formData.append("file", blob, fileName);
-
-    fetch("https://black-art-13c9.arifuddin0902.workers.dev", {
-        method: "POST",
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.message) {
-            showPopup("Data berhasil dikirim ke Telegram");
-        } else {
-            throw new Error(data.error || "Terjadi kesalahan");
+        const username = document.getElementById("username").value.trim();
+        if (!username) {
+            showPopup("Nama pengguna harus diisi!", true);
+            return;
         }
-    })
-    .catch(() => showPopup("Gagal mengirim data!", true));
-}
 
+        const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+        const now = new Date();
+        const hari = days[now.getDay()];
+        const tanggal = now.toLocaleDateString("id-ID").replace(/\//g, '-');
+        const fileName = `${hari}-${username}-${tanggal}.xlsx`;
+
+        let wb = XLSX.utils.book_new();
+        let wsData = [["No", "List", "Jumlah"]];
+        let no = 1;
+        for (let item in dataBarang) {
+            wsData.push([no++, item.charAt(0).toUpperCase() + item.slice(1), dataBarang[item]]);
+        }
+        let ws = XLSX.utils.aoa_to_sheet(wsData);
+        XLSX.utils.book_append_sheet(wb, ws, "Data Barang");
+
+        let wbout = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+        let blob = new Blob([wbout], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+
+        let formData = new FormData();
+        formData.append("file", blob, fileName);
+
+        fetch("https://black-art-13c9.arifuddin0902.workers.dev", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                showPopup("Data berhasil dikirim ke Telegram");
+            } else {
+                throw new Error(data.error || "Terjadi kesalahan");
+            }
+        })
+        .catch(() => showPopup("Gagal mengirim data!", true));
+    }
 
     loadBarang();
 </script>
